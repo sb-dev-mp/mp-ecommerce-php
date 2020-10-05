@@ -42,7 +42,65 @@
 
 
 <body class="as-theme-light-heroimage">
+<?php
+    require_once 'vendor/autoload.php'; // You have to require the library from your Composer vendor folder
 
+    MercadoPago\SDK::setAccessToken(getenv("ACCESS_TOKEN")); // Either Production or SandBox AccessToken
+    MercadoPago\SDK::setIntegratorId(getenv("INTEGRATOR_ID")); // https://www.mercadopago.com.ar/developers/es/guides/online-payments/checkout-pro/configurations/
+
+    // Crea un objeto de preferencia
+    $preference = new MercadoPago\Preference();
+
+    // Crea un ítem en la preferencia
+    $item = new MercadoPago\Item();
+    $item->id = "1234";
+    $item->title = $_POST["title"];
+    $item->quantity = 1; // $_POST["unit"];
+    $item->unit_price = $_POST["price"];
+    $item->picture_url = $_POST["img"];
+    $item->description = "Dispositivo móvil de Tienda e-commerce";
+    
+    // Crea el pagador de prueba
+    $payer = new MercadoPago\Payer();
+    $payer->name = "Lalo";
+    $payer->surname = "Landa";
+    $payer->email = "test_user_63274575@testuser.com";
+    $payer->identification = array(
+        "type" => "DNI",
+        "number" => "123456789"
+    );
+    $payer->phone = array(
+        "area_code" => "11",
+        "number" => "22223333"
+    );
+    $payer->address = array(
+        "street_name" => "False",
+        "street_number" => 123,
+        "zip_code" => "1111"
+    );
+
+    $preference->payment_methods = array(
+        "installments" => 6, // Máximo 6 cuotas
+        "excluded_payment_methods" => array(
+            array("id" => "amex")
+        ), // No permitir American Express (amex)
+        "excluded_payment_types" => array(
+            array("id" => "atm")
+        ) // No permitir cajeros automáticos (atm)
+    );
+    $preference->items = array($item); // Agrega item de compra
+    $preference->payer = $payer; // Agrega pagador 
+    $preference->external_reference =  getenv("OWNER"); // Referencia para la certificación; Registrado como 'Config Vars' en Heroku por motivos de seguridad
+    $preference->auto_return = "all"; //"approved"; // Retorno en todos los casos (no solo en caso de pago aprobado)
+    $preference->back_urls = array(
+        "success" => $_SERVER['SERVER_NAME'] . "/mp/outcome.php?status=success",
+        "failure" => $_SERVER['SERVER_NAME'] . "/mp/outcome.php?status=failure",
+        "pending" => $_SERVER['SERVER_NAME'] . "/mp/outcome.php?status=pending"
+    ); // Páginas de retorno
+    //$preference->notification_url = $_SERVER['SERVER_NAME'] . "/mp/notification.php"; //Notificaciones de webhook
+
+    $preference->save();
+?>
     <div class="stack">
         
         <div class="as-search-wrapper" role="main">
@@ -55,7 +113,7 @@
                                     <img src="./assets/music-audio-alp-201709" alt="" width="1440" height="320" data-scale-params-2="wid=2880&amp;hei=640&amp;fmt=jpeg&amp;qlt=95&amp;op_usm=0.5,0.5&amp;.v=1503948581306" class="pd-billboard-hero ir">
                                 </div>
                                 <div class="pd-billboard-info">
-                                    <h1 class="pd-billboard-header pd-util-compact-small-18">Tienda e-commerce</h1>
+                                    <a href="/mp"><h1 class="pd-billboard-header pd-util-compact-small-18">Tienda e-commerce</h1></a>
                                 </div>
                             </div>
                         </div>
@@ -100,7 +158,7 @@
                                             <div class="clearfix image-list xs-no-js as-util-relatedlink relatedlink" data-relatedlink="6|Powerbeats3 Wireless Earphones - Neighborhood Collection - Brick Red|MPXP2">
                                                 <div class="as-tilegallery-element as-image-selected">
                                                     <div class=""></div>
-                                                    <img src="./assets/003.jpg" class="ir ir item-image as-producttile-image" alt="" width="445" height="445" style="content:-webkit-image-set(url(<?php echo $_POST['img'] ?>) 2x);">
+                                                    <img src="<?php echo $_POST['img'] ?>" class="ir ir item-image as-producttile-image" alt="" width="445" height="445" style="max-width: 445px">
                                                 </div>
                                                 
                                             </div>
@@ -124,13 +182,15 @@
                                             </h3>
                                         </div>
                                         <h3 >
-                                            <?php echo $_POST['price'] ?>
+                                            $<?php echo $_POST['price'] ?>
                                         </h3>
                                         <h3 >
-                                            <?php echo "$" . $_POST['unit'] ?>
+                                            cantidad: <?php echo $_POST['unit'] ?>
                                         </h3>
                                     </div>
-                                    <button type="submit" class="mercadopago-button" formmethod="post">Pagar</button>
+                                    <form action="<?php echo $preference->init_point; ?>" method="POST">
+                                        <button type="submit" class="mercadopago-button">Pagar la compra</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -142,9 +202,10 @@
         <div class="as-footnotes">
             <div class="as-footnotes-content">
                 <div class="as-footnotes-sosumi">
-                    Todos los derechos reservados Tienda Tecno 2019
+                    Todos los derechos reservados Tienda Tecno 2020
                 </div>
             </div>
         </div>
 
 </div><div class="mp-mercadopago-checkout-wrapper" style="z-index:-2147483647;display:block;background:rgba(0, 0, 0, 0.7);border:0;overflow:hidden;visibility:hidden;margin:0;padding:0;position:fixed;left:0;top:0;width:0;opacity:0;height:0;transition:opacity 220ms ease-in;"> <svg class="mp-spinner" viewBox="25 25 50 50"> <circle class="mp-spinner-path" cx="50" cy="50" r="20" fill="none" stroke-miterlimit="10"></circle> </svg> </div><div class="mp-mercadopago-checkout-wrapper" style="z-index:-2147483647;display:block;background:rgba(0, 0, 0, 0.7);border:0;overflow:hidden;visibility:hidden;margin:0;padding:0;position:fixed;left:0;top:0;width:0;opacity:0;height:0;transition:opacity 220ms ease-in;"> <svg class="mp-spinner" viewBox="25 25 50 50"> <circle class="mp-spinner-path" cx="50" cy="50" r="20" fill="none" stroke-miterlimit="10"></circle> </svg> </div><div class="mp-mercadopago-checkout-wrapper" style="z-index:-2147483647;display:block;background:rgba(0, 0, 0, 0.7);border:0;overflow:hidden;visibility:hidden;margin:0;padding:0;position:fixed;left:0;top:0;width:0;opacity:0;height:0;transition:opacity 220ms ease-in;"> <svg class="mp-spinner" viewBox="25 25 50 50"> <circle class="mp-spinner-path" cx="50" cy="50" r="20" fill="none" stroke-miterlimit="10"></circle> </svg> </div><div class="mp-mercadopago-checkout-wrapper" style="z-index:-2147483647;display:block;background:rgba(0, 0, 0, 0.7);border:0;overflow:hidden;visibility:hidden;margin:0;padding:0;position:fixed;left:0;top:0;width:0;opacity:0;height:0;transition:opacity 220ms ease-in;"> <svg class="mp-spinner" viewBox="25 25 50 50"> <circle class="mp-spinner-path" cx="50" cy="50" r="20" fill="none" stroke-miterlimit="10"></circle> </svg> </div><div class="mp-mercadopago-checkout-wrapper" style="z-index:-2147483647;display:block;background:rgba(0, 0, 0, 0.7);border:0;overflow:hidden;visibility:hidden;margin:0;padding:0;position:fixed;left:0;top:0;width:0;opacity:0;height:0;transition:opacity 220ms ease-in;"> <svg class="mp-spinner" viewBox="25 25 50 50"> <circle class="mp-spinner-path" cx="50" cy="50" r="20" fill="none" stroke-miterlimit="10"></circle> </svg> </div><div class="mp-mercadopago-checkout-wrapper" style="z-index:-2147483647;display:block;background:rgba(0, 0, 0, 0.7);border:0;overflow:hidden;visibility:hidden;margin:0;padding:0;position:fixed;left:0;top:0;width:0;opacity:0;height:0;transition:opacity 220ms ease-in;"> <svg class="mp-spinner" viewBox="25 25 50 50"> <circle class="mp-spinner-path" cx="50" cy="50" r="20" fill="none" stroke-miterlimit="10"></circle> </svg> </div><div id="ac-gn-viewport-emitter"> </div></body></html>
+<script src="https://www.mercadopago.com/v2/security.js" view="item"></script>
