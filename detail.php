@@ -57,7 +57,7 @@
     $item->title = $_POST["title"];
     $item->quantity = 1; // $_POST["unit"];
     $item->unit_price = $_POST["price"];
-    $item->picture_url = $_POST["img"];
+    $item->picture_url = $_SERVER['SERVER_NAME'] . $_POST["img"];
     $item->description = "Dispositivo móvil de Tienda e-commerce";
     
     // Crea el pagador de prueba
@@ -91,7 +91,7 @@
     $preference->items = array($item); // Agrega item de compra
     $preference->payer = $payer; // Agrega pagador 
     $preference->external_reference =  getenv("OWNER"); // Referencia para la certificación; Registrado como 'Config Vars' en Heroku por motivos de seguridad
-    $preference->auto_return = "all"; //"approved"; // Retorno en todos los casos (no solo en caso de pago aprobado)
+    $preference->auto_return = "approved"; // Retorno solo en caso de pago aprobado
     $preference->back_urls = array(
         "success" => $_SERVER['SERVER_NAME'] . "/outcome.php?status=success",
         "failure" => $_SERVER['SERVER_NAME'] . "/outcome.php?status=failure",
