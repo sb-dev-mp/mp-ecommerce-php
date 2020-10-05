@@ -93,11 +93,11 @@
     $preference->external_reference =  getenv("OWNER"); // Referencia para la certificación; Registrado como 'Config Vars' en Heroku por motivos de seguridad
     $preference->auto_return = "all"; //"approved"; // Retorno en todos los casos (no solo en caso de pago aprobado)
     $preference->back_urls = array(
-        "success" => $_SERVER['SERVER_NAME'] . "/mp/outcome.php?status=success",
-        "failure" => $_SERVER['SERVER_NAME'] . "/mp/outcome.php?status=failure",
-        "pending" => $_SERVER['SERVER_NAME'] . "/mp/outcome.php?status=pending"
+        "success" => $_SERVER['SERVER_NAME'] . "/outcome.php?status=success",
+        "failure" => $_SERVER['SERVER_NAME'] . "/outcome.php?status=failure",
+        "pending" => $_SERVER['SERVER_NAME'] . "/outcome.php?status=pending"
     ); // Páginas de retorno
-    //$preference->notification_url = $_SERVER['SERVER_NAME'] . "/mp/notification.php"; //Notificaciones de webhook
+    $preference->notification_url = $_SERVER['SERVER_NAME'] . "/notification.php"; //Notificaciones de webhook
 
     $preference->save();
 ?>
@@ -113,7 +113,7 @@
                                     <img src="./assets/music-audio-alp-201709" alt="" width="1440" height="320" data-scale-params-2="wid=2880&amp;hei=640&amp;fmt=jpeg&amp;qlt=95&amp;op_usm=0.5,0.5&amp;.v=1503948581306" class="pd-billboard-hero ir">
                                 </div>
                                 <div class="pd-billboard-info">
-                                    <a href="/mp"><h1 class="pd-billboard-header pd-util-compact-small-18">Tienda e-commerce</h1></a>
+                                    <a href="/"><h1 class="pd-billboard-header pd-util-compact-small-18">Tienda e-commerce</h1></a>
                                 </div>
                             </div>
                         </div>
