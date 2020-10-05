@@ -1,9 +1,9 @@
 <?php
+
+if (isset($_POST)) {
   $entityBody = file_get_contents('php://input');
-  if (isset($_POST)) {
-    if ($entityBody != NULL && $entityBody->action == "payment.created")
-      file_put_contents(__DIR__ . '/log.json', json_encode($entityBody));
-    http_response_code(200);
-  } else  {
-    file_put_contents(__DIR__ . '/log.txt', json_encode($entityBody));
-  }
+  $json = json_decode($entityBody);
+  if ($json->action == "payment.created")
+    file_put_contents(__DIR__ . '/log.json', json_encode($json));
+  http_response_code(200);
+}
